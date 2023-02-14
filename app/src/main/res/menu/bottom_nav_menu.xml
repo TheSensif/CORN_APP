@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:title="@string/inici"
+        android:icon="@drawable/baseline_apps_24"
+        android:id="@+id/Inici"/>
+    <item
+        android:title="@string/cobrament"
+        android:icon="@drawable/baseline_attach_money_24"
+        android:id="@+id/Cobrament"/>
+    <item
+        android:title="@string/escanejar"
+        android:icon="@drawable/baseline_qr_code_scanner_24"
+        android:id="@+id/Escanejar"/>
+    <item
+        android:title="@string/historial"
+        android:icon="@drawable/baseline_history_24"
+        android:id="@+id/Historial"/>
+    <item
+        android:title="@string/perfil"
+        android:icon="@drawable/baseline_person_24"
+        android:id="@+id/Perfil"/>
+</menu>
