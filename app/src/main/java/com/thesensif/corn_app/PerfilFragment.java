@@ -7,6 +7,11 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -61,6 +66,39 @@ public class PerfilFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_perfil, container, false);
 
+        Button syncButon = v.findViewById(R.id.sync);
+        EditText telefon = v.findViewById(R.id.editTextPhone);
+        EditText name = v.findViewById(R.id.editTextTextPersonName);
+        EditText surname = v.findViewById(R.id.editTextTextPersonSurname);
+        EditText email = v.findViewById(R.id.editTextTextEmailAddress2);
+
+        syncButon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    JSONObject obj = new JSONObject("{}");
+                    obj.put("name", name.getText());
+                    obj.put("lastName", surname.getText());
+                    obj.put("email", email.getText());
+                    obj.put("phoneNumber", telefon.getText());
+                    obj.put("balance", 100);
+
+                   UtilsHTTP.sendPOST("https://server-production-cc78.up.railway.app:443/api/signup", obj.toString(), (response) -> {
+                        try {
+                            JSONObject obj2 = new JSONObject(response);
+                            System.out.println(obj2.getString("status"));
+                            System.out.println(obj2.getString("result"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         return  v;
     }
