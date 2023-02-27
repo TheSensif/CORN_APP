@@ -36,7 +36,7 @@
         android:inputType="textPersonName" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName4"
+        android:id="@+id/editTextTextPersonSurname"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:ems="10"
@@ -64,4 +64,12 @@
         android:layout_marginTop="340dp"
         android:inputType="textEmailAddress"
         android:hint="@string/correo"/>
+
+    <Button
+        android:id="@+id/sync"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="440dp"
+        android:text="SYNC" />
 </FrameLayout>
