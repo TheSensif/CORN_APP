@@ -1,9 +1,14 @@
 package com.thesensif.corn_app;
 
+
+import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,13 +88,66 @@ public class PerfilFragment extends Fragment {
                     obj.put("phoneNumber", telefon.getText());
                     obj.put("balance", 100);
 
-                   UtilsHTTP.sendPOST("https://server-production-cc78.up.railway.app:443/api/signup", obj.toString(), (response) -> {
+                   UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/signup", obj.toString(), (response) -> {
                         try {
                             JSONObject obj2 = new JSONObject(response);
-                            System.out.println(obj2.getString("status"));
-                            System.out.println(obj2.getString("result"));
+                            if (obj2.getString("status").equals("OK")) {
+                                // Datos de usuario en bariables estaticas
+                                MainActivity.telephon = telefon.getText().toString();
+                                MainActivity.name = name.getText().toString();
+                                MainActivity.surname = surname.getText().toString();
+                                MainActivity.email = email.getText().toString();
+
+                                Handler handler = new Handler(Looper.getMainLooper());
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
+                                        alerta.setTitle("Login");
+                                        try {
+                                            alerta.setMessage(obj2.getString("message"));
+                                        } catch (JSONException e) {
+                                            System.out.println(e);
+                                        }
+                                        alerta.setNegativeButton("Cerrar" ,new DialogInterface.OnClickListener() {
+
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                        alerta.show();
+                                    }
+                                });
+
+                            } else if (obj2.getString("status").equals("ERROR")){
+                                Handler handler = new Handler(Looper.getMainLooper());
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
+
+                                        alerta.setTitle("ERROR");
+                                        try {
+                                            alerta.setMessage(obj2.getString("message"));
+                                        } catch (JSONException e) {
+                                            System.out.println(e);
+                                        }
+                                        alerta.setNegativeButton("Cerrar" ,new DialogInterface.OnClickListener() {
+
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                        alerta.show();
+                                    }
+                                });
+
+                            }
+                            System.out.println(obj2.getString("message"));
                         } catch (JSONException e) {
-                            throw new RuntimeException(e);
+                            System.out.println("Error");
                         }
                     });
 

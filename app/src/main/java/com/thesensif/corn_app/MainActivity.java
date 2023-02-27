@@ -12,6 +12,11 @@ import com.thesensif.corn_app.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
+    public static String telephon;
+    public static String name;
+    public static String surname;
+    public static String email;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
