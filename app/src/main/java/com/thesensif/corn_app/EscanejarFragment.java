@@ -2,6 +2,8 @@ package com.thesensif.corn_app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -15,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +28,9 @@ import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.google.zxing.Result;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -92,6 +99,181 @@ public class EscanejarFragment extends Fragment {
                     public void run() {
                         Toast.makeText(activity, result.getText(), Toast.LENGTH_SHORT).show();
                         System.out.println("RESULT: " + result.getText());
+                        try {
+                            JSONObject obj = new JSONObject("{}");
+                            obj.put("user_id", MainActivity.telephon);
+                            obj.put("transaction_token", result.getText());
+                            UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/start_payment", obj.toString(), (response) -> {
+                                try {
+                                    JSONObject obj2 = new JSONObject(response);
+                                    if (obj2.getString("status").equals("OK")) {
+                                        // Add the buttons
+                                        Handler handler = new Handler(Looper.getMainLooper());
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                    builder.setTitle("Confirmacion transaccion")
+                                                            .setMessage("Apruebas hacer la transaccion con un importe de: " + obj2.getString("amount"))
+                                                            .setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+                                                                    try {
+                                                                        JSONObject obj3 = new JSONObject("{}");
+                                                                        obj3.put("user_id", MainActivity.telephon);
+                                                                        obj3.put("transaction_token", result.getText());
+                                                                        obj3.put("accept", true);
+                                                                        obj3.put("amount", obj2.getString("amount"));
+
+                                                                        UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/finish_payment", obj3.toString(), (response) -> {
+                                                                            try {
+                                                                                JSONObject obj4 = new JSONObject(response);
+                                                                                if (obj4.getString("status").equals("OK")) {
+                                                                                    Handler handler = new Handler(Looper.getMainLooper());
+                                                                                    handler.post(new Runnable() {
+                                                                                        @Override
+                                                                                        public void run() {
+                                                                                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                                                            builder.setTitle("Transaccion aceptada")
+                                                                                                    .setMessage("La transaccion ha sido aceptada")
+                                                                                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                                                                        public void onClick(DialogInterface dialog, int id) {
+
+                                                                                                        }
+                                                                                                    });
+                                                                                            AlertDialog dialog2 = builder.create();
+                                                                                            dialog2.show();
+                                                                                        }
+                                                                                    });
+                                                                                } else if (obj4.getString("status").equals("ERROR")) {
+                                                                                    Handler handler = new Handler(Looper.getMainLooper());
+                                                                                    handler.post(new Runnable() {
+                                                                                        @Override
+                                                                                        public void run() {
+                                                                                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                                                            try {
+                                                                                                builder.setTitle("Error")
+                                                                                                        .setMessage(obj4.getString("message"))
+                                                                                                        .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                                                                                                            public void onClick(DialogInterface dialog, int id) {
+                                                                                                                // User clicked OK button
+                                                                                                            }
+                                                                                                        });
+                                                                                            } catch (JSONException e) {
+                                                                                                e.printStackTrace();
+                                                                                            }
+                                                                                            AlertDialog dialog2 = builder.create();
+                                                                                            dialog2.show();
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            } catch (JSONException e) {
+                                                                                throw new RuntimeException(e);
+                                                                            }
+                                                                        });
+                                                                    } catch (JSONException e) {
+                                                                        throw new RuntimeException(e);
+                                                                    }
+                                                                }
+                                                            });
+                                                    builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            try {
+                                                                JSONObject obj3 = new JSONObject("{}");
+                                                                obj3.put("user_id", MainActivity.telephon);
+                                                                obj3.put("transaction_token", result.getText());
+                                                                obj3.put("accept", false);
+                                                                obj3.put("amount", obj2.getString("amount"));
+
+                                                                UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/finish_payment", obj3.toString(), (response) -> {
+                                                                    try {
+                                                                        JSONObject obj4 = new JSONObject(response);
+                                                                        if (obj4.getString("status").equals("OK")) {
+                                                                            Handler handler = new Handler(Looper.getMainLooper());
+                                                                            handler.post(new Runnable() {
+                                                                                @Override
+                                                                                public void run() {
+                                                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                                                    builder.setTitle("Transaccion rechazada")
+                                                                                            .setMessage("La transaccion ha sido rechazada")
+                                                                                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                                                                public void onClick(DialogInterface dialog, int id) {
+
+                                                                                                }
+                                                                                            });
+                                                                                    AlertDialog dialog2 = builder.create();
+                                                                                    dialog2.show();
+                                                                                }
+                                                                            });
+                                                                        } else if (obj4.getString("status").equals("ERROR")) {
+                                                                            Handler handler = new Handler(Looper.getMainLooper());
+                                                                            handler.post(new Runnable() {
+                                                                                @Override
+                                                                                public void run() {
+                                                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                                                    try {
+                                                                                        builder.setTitle("Error")
+                                                                                                .setMessage(obj4.getString("message"))
+                                                                                                .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                                                                                                    public void onClick(DialogInterface dialog, int id) {
+                                                                                                        // User clicked OK button
+                                                                                                    }
+                                                                                                });
+                                                                                    } catch (JSONException e) {
+                                                                                        e.printStackTrace();
+                                                                                    }
+                                                                                    AlertDialog dialog2 = builder.create();
+                                                                                    dialog2.show();
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    } catch (JSONException e) {
+                                                                        throw new RuntimeException(e);
+                                                                    }
+                                                                });
+                                                            } catch (JSONException e) {
+                                                                throw new RuntimeException(e);
+                                                            }
+                                                        }
+                                                    });
+                                                    AlertDialog dialog = builder.create();
+                                                    dialog.show();
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+
+                                    } else if (obj2.getString("status").equals("ERROR")){
+                                        Handler handler = new Handler(Looper.getMainLooper());
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                                                try {
+                                                    builder.setTitle("Error")
+                                                            .setMessage(obj2.getString("message"))
+                                                            .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+                                                                    // User clicked OK button
+                                                                }
+                                                            });
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                AlertDialog dialog = builder.create();
+                                                dialog.show();
+                                            }
+                                        });
+                                    }
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 });
             }
