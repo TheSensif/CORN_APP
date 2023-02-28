@@ -75,7 +75,7 @@ public class PerfilFragment extends Fragment {
         EditText telefon = v.findViewById(R.id.editTextPhone);
         EditText name = v.findViewById(R.id.editTextTextPersonName);
         EditText surname = v.findViewById(R.id.editTextTextPersonSurname);
-        EditText email = v.findViewById(R.id.editTextTextEmailAddress2);
+        EditText email = v.findViewById(R.id.editTextTextEmailAddress);
 
         syncButon.setOnClickListener(new View.OnClickListener() {
             @Override
