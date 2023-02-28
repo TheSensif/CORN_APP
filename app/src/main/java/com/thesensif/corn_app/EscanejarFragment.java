@@ -114,8 +114,8 @@ public class EscanejarFragment extends Fragment {
                                             public void run() {
                                                 try {
                                                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Confirmacion transaccion")
-                                                            .setMessage("Apruebas hacer la transaccion con un importe de: " + obj2.getString("amount"))
+                                                    builder.setTitle("Confirmació transacció")
+                                                            .setMessage("Aproves fer la transacció amb un import de: " + obj2.getString("amount"))
                                                             .setPositiveButton("SI", new DialogInterface.OnClickListener() {
                                                                 public void onClick(DialogInterface dialog, int id) {
                                                                     try {
@@ -134,9 +134,9 @@ public class EscanejarFragment extends Fragment {
                                                                                         @Override
                                                                                         public void run() {
                                                                                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                                                            builder.setTitle("Transaccion aceptada")
-                                                                                                    .setMessage("La transaccion ha sido aceptada")
-                                                                                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                                                            builder.setTitle("Transacció acceptada")
+                                                                                                    .setMessage("La transacció ha estat acceptada")
+                                                                                                    .setPositiveButton("Tancar", new DialogInterface.OnClickListener() {
                                                                                                         public void onClick(DialogInterface dialog, int id) {
 
                                                                                                         }
@@ -154,7 +154,7 @@ public class EscanejarFragment extends Fragment {
                                                                                             try {
                                                                                                 builder.setTitle("Error")
                                                                                                         .setMessage(obj4.getString("message"))
-                                                                                                        .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                                                                                                        .setNegativeButton("Tancar", new DialogInterface.OnClickListener() {
                                                                                                             public void onClick(DialogInterface dialog, int id) {
                                                                                                                 // User clicked OK button
                                                                                                             }
@@ -194,9 +194,9 @@ public class EscanejarFragment extends Fragment {
                                                                                 @Override
                                                                                 public void run() {
                                                                                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                                                    builder.setTitle("Transaccion rechazada")
-                                                                                            .setMessage("La transaccion ha sido rechazada")
-                                                                                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                                                    builder.setTitle("Transacció rebutjada")
+                                                                                            .setMessage("La transacció ha estat rebutjada")
+                                                                                            .setPositiveButton("Tancar", new DialogInterface.OnClickListener() {
                                                                                                 public void onClick(DialogInterface dialog, int id) {
 
                                                                                                 }
@@ -214,7 +214,7 @@ public class EscanejarFragment extends Fragment {
                                                                                     try {
                                                                                         builder.setTitle("Error")
                                                                                                 .setMessage(obj4.getString("message"))
-                                                                                                .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                                                                                                .setNegativeButton("Tancar", new DialogInterface.OnClickListener() {
                                                                                                     public void onClick(DialogInterface dialog, int id) {
                                                                                                         // User clicked OK button
                                                                                                     }
@@ -254,7 +254,7 @@ public class EscanejarFragment extends Fragment {
                                                 try {
                                                     builder.setTitle("Error")
                                                             .setMessage(obj2.getString("message"))
-                                                            .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                                                            .setNegativeButton("Tancar", new DialogInterface.OnClickListener() {
                                                                 public void onClick(DialogInterface dialog, int id) {
                                                                     // User clicked OK button
                                                                 }

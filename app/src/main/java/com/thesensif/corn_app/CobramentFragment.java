@@ -136,7 +136,7 @@ public class CobramentFragment extends Fragment {
             @Override
             public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Introducir cantidad");
+                builder.setTitle("Introduir quantitat");
 
                 final EditText input = new EditText(getActivity());
 
@@ -144,7 +144,7 @@ public class CobramentFragment extends Fragment {
                 builder.setView(input);
 
                 // Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("Generar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String cantidad = input.getText().toString();
@@ -190,7 +190,7 @@ public class CobramentFragment extends Fragment {
                         }
                     }
                 });
-                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("CANCEL·LAR", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
