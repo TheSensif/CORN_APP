@@ -140,7 +140,7 @@ public class CobramentFragment extends Fragment {
 
                 final EditText input = new EditText(getActivity());
 
-                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
                 builder.setView(input);
 
                 // Set up the buttons
