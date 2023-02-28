@@ -113,14 +113,14 @@ public class CobramentFragment extends Fragment {
             public void run() {
                 Bitmap bitmap;
                 // Initializing the QR Encoder with your value to be encoded, type you required and Dimension
-                QRGEncoder qrgEncoder = new QRGEncoder(token, null, QRGContents.Type.TEXT, 100);
+                QRGEncoder qrgEncoder = new QRGEncoder(token, null, QRGContents.Type.TEXT, 120);
                 qrgEncoder.setColorBlack(Color.BLACK);
                 qrgEncoder.setColorWhite(Color.WHITE);
                 try {
                     // Getting QR-Code as Bitmap
                     bitmap = qrgEncoder.getBitmap(0);
                     // Setting Bitmap to ImageView
-                    qrImage.setImageBitmap(bitmap);
+                    qrImage.setImageBitmap(Bitmap.createScaledBitmap(bitmap,320,320,false));
                 } catch (Exception e) {
                     System.out.println("error");
                 }
