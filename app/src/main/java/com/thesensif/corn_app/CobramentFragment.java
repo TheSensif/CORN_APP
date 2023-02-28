@@ -113,14 +113,14 @@ public class CobramentFragment extends Fragment {
             public void run() {
                 Bitmap bitmap;
                 // Initializing the QR Encoder with your value to be encoded, type you required and Dimension
-                QRGEncoder qrgEncoder = new QRGEncoder(token, null, QRGContents.Type.TEXT, 100);
+                QRGEncoder qrgEncoder = new QRGEncoder(token, null, QRGContents.Type.TEXT, 120);
                 qrgEncoder.setColorBlack(Color.BLACK);
                 qrgEncoder.setColorWhite(Color.WHITE);
                 try {
                     // Getting QR-Code as Bitmap
                     bitmap = qrgEncoder.getBitmap(0);
                     // Setting Bitmap to ImageView
-                    qrImage.setImageBitmap(bitmap);
+                    qrImage.setImageBitmap(Bitmap.createScaledBitmap(bitmap,320,320,false));
                 } catch (Exception e) {
                     System.out.println("error");
                 }
@@ -136,15 +136,15 @@ public class CobramentFragment extends Fragment {
             @Override
             public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Introducir cantidad");
+                builder.setTitle("Introduir quantitat");
 
                 final EditText input = new EditText(getActivity());
 
-                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
                 builder.setView(input);
 
                 // Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("Generar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String cantidad = input.getText().toString();
@@ -190,7 +190,7 @@ public class CobramentFragment extends Fragment {
                         }
                     }
                 });
-                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("CANCEL·LAR", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
