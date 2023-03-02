@@ -79,7 +79,7 @@
         app:layout_constraintTop_toBottomOf="@+id/registerEmail" />
 
     <EditText
-        android:id="@+id/editTextTextPassword"
+        android:id="@+id/registerPassword"
         android:layout_width="220dp"
         android:layout_height="48dp"
         android:layout_marginStart="93dp"
@@ -103,7 +103,6 @@
         android:layout_marginStart="93dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="98dp"
-        android:layout_marginBottom="48dp"
         android:background="@drawable/custom_input"
         android:drawableStart="@drawable/custom_password_icon"
         android:drawablePadding="12dp"
@@ -111,17 +110,16 @@
         android:hint="@string/repetirContrseña"
         android:inputType="textPassword"
         android:paddingStart="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/registerRegister"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/registerPassword" />
 
     <Button
         android:id="@+id/registerRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="60dp"
-        android:layout_marginBottom="148dp"
+        android:layout_marginBottom="76dp"
         android:text="Registra't"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -131,8 +129,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
-        android:layout_marginBottom="148dp"
+        android:layout_marginBottom="76dp"
         android:text="Iniciar Sessió"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/registerText"
+        android:layout_width="112dp"
+        android:layout_height="39dp"
+        android:layout_marginStart="166dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="193dp"
+        android:text="Registre"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.283"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
