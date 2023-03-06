@@ -30,7 +30,7 @@
         android:id="@+id/loginPassword"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_marginStart="101dp"
+        android:layout_marginStart="102dp"
         android:layout_marginTop="36dp"
         android:layout_marginEnd="100dp"
         android:background="@drawable/custom_input"
@@ -58,9 +58,11 @@
         android:id="@+id/register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
         android:layout_marginEnd="60dp"
         android:layout_marginBottom="116dp"
         android:text="Registra't"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/login" />
 </androidx.constraintlayout.widget.ConstraintLayout>
