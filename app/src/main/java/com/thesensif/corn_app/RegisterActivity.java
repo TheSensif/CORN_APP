@@ -65,13 +65,18 @@ public class RegisterActivity extends AppCompatActivity {
                     if (value.equals("true")) {
                         UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/signup", obj.toString(), (response) -> {
                             try {
+
                                 JSONObject obj2 = new JSONObject(response);
-                                System.out.println(obj2.getString("status"));
-                                System.out.println(obj2.getString("message"));
-                                LoginActivity.session_token = obj2.getString("session_token");
-                                guardarPref();
-                                System.out.println(LoginActivity.session_token);
-                                dialog(obj2.getString("status"),obj2.getString("message"));
+                                System.out.println(response);
+                                if (obj2.getString("status").equals("OK")) {
+                                    LoginActivity.session_token = obj2.getString("session_token");
+                                    guardarPref();
+                                    System.out.println(LoginActivity.session_token);
+                                    dialog(obj2.getString("status"),obj2.getString("message"));
+                                } else if (obj2.getString("status").equals("ERROR")) {
+                                    dialog(obj2.getString("status"),obj2.getString("message"));
+
+                                }
                             } catch (JSONException e) {
                                 System.out.println();
                             }
@@ -105,6 +110,10 @@ public class RegisterActivity extends AppCompatActivity {
                     alerta.setNegativeButton("Tancar" ,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            MainActivity.name = name.getText().toString();
+                            MainActivity.surname = surname.getText().toString();
+                            MainActivity.email = email.getText().toString();
+                            MainActivity.telephon = phone.getText().toString();
                             startActivity(new Intent(RegisterActivity.this,MainActivity.class));
                         }
                     });

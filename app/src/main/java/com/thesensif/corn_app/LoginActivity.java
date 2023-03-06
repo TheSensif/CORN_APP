@@ -53,10 +53,16 @@ public class LoginActivity extends AppCompatActivity {
                     UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/login", obj.toString(), (response) -> {
                         try {
                             JSONObject obj2 = new JSONObject(response);
-                            session_token = obj2.getString("session_token");
-                            System.out.println(session_token);
-                            guardarPref();
-                            dialog(obj2.getString("status"),obj2.getString("message"));
+                            if (obj2.getString("status").equals("OK")) {
+                                session_token = obj2.getString("session_token");
+                                getProfile();
+                                System.out.println(session_token);
+                                guardarPref();
+                                dialog(obj2.getString("status"),obj2.getString("message"));
+                            } else if (obj2.getString("status").equals("ERROR")) {
+                                dialog(obj2.getString("status"),obj2.getString("message"));
+                            }
+
                         } catch (JSONException e) {
                             System.out.println();
                         }
