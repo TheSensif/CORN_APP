@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -66,6 +68,9 @@ public class RegisterActivity extends AppCompatActivity {
                                 JSONObject obj2 = new JSONObject(response);
                                 System.out.println(obj2.getString("status"));
                                 System.out.println(obj2.getString("message"));
+                                LoginActivity.session_token = obj2.getString("session_token");
+                                guardarPref();
+                                System.out.println(LoginActivity.session_token);
                                 dialog(obj2.getString("status"),obj2.getString("message"));
                             } catch (JSONException e) {
                                 System.out.println();
@@ -100,7 +105,7 @@ public class RegisterActivity extends AppCompatActivity {
                     alerta.setNegativeButton("Tancar" ,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+                            startActivity(new Intent(RegisterActivity.this,MainActivity.class));
                         }
                     });
                     alerta.show();
@@ -118,5 +123,13 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void guardarPref() {
+        SharedPreferences datos = PreferenceManager.getDefaultSharedPreferences(
+                RegisterActivity.this);
+        SharedPreferences.Editor miEditor = datos.edit();
+        miEditor.putString("session_token",LoginActivity.session_token);
+        miEditor.apply();
     }
 }
