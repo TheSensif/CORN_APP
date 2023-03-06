@@ -2,6 +2,8 @@ package com.thesensif.corn_app;
 
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -9,6 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,80 +79,36 @@ public class PerfilFragment extends Fragment {
         EditText name = v.findViewById(R.id.editTextTextPersonName);
         EditText surname = v.findViewById(R.id.editTextTextPersonSurname);
         EditText email = v.findViewById(R.id.editTextTextEmailAddress);
+        name.setText(MainActivity.name);
+        surname.setText(MainActivity.surname);
+        email.setText(MainActivity.email);
+        telefon.setText(MainActivity.telephon);
 
         syncButon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     JSONObject obj = new JSONObject("{}");
-                    obj.put("name", name.getText());
-                    obj.put("lastName", surname.getText());
-                    obj.put("email", email.getText());
-                    obj.put("phoneNumber", telefon.getText());
-                    obj.put("balance", 100);
+                    obj.put("session_token", LoginActivity.session_token);
 
-                   UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/signup", obj.toString(), (response) -> {
-                        try {
-                            JSONObject obj2 = new JSONObject(response);
-                            if (obj2.getString("status").equals("OK")) {
-                                // Datos de usuario en bariables estaticas
-                                MainActivity.telephon = telefon.getText().toString();
-                                MainActivity.name = name.getText().toString();
-                                MainActivity.surname = surname.getText().toString();
-                                MainActivity.email = email.getText().toString();
+                   UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/logout", obj.toString(), (response) -> {
+                       try {
+                           JSONObject obj2 = new JSONObject(response);
+                           if (obj2.getString("status").equals("OK")) {
+                                LoginActivity.session_token = "";
+                               SharedPreferences datos = PreferenceManager.getDefaultSharedPreferences(
+                                       getActivity());
+                               SharedPreferences.Editor miEditor = datos.edit();
+                               miEditor.remove("session_token").apply();
+                               dialog(obj2.getString("status"),obj2.getString("message"));
+                           } else if (obj2.getString("status").equals("ERROR")) {
+                               dialog(obj2.getString("status"),obj2.getString("message"));
+                           }
+                       } catch (JSONException e) {
+                           System.out.println();
+                       }
 
-                                Handler handler = new Handler(Looper.getMainLooper());
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
-                                        alerta.setTitle("Login");
-                                        try {
-                                            alerta.setMessage(obj2.getString("message"));
-                                        } catch (JSONException e) {
-                                            System.out.println(e);
-                                        }
-                                        alerta.setNegativeButton("Cerrar" ,new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                        alerta.show();
-                                    }
-                                });
-
-                            } else if (obj2.getString("status").equals("ERROR")){
-                                Handler handler = new Handler(Looper.getMainLooper());
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
-
-                                        alerta.setTitle("ERROR");
-                                        try {
-                                            alerta.setMessage(obj2.getString("message"));
-                                        } catch (JSONException e) {
-                                            System.out.println(e);
-                                        }
-                                        alerta.setNegativeButton("Cerrar" ,new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                        alerta.show();
-                                    }
-                                });
-
-                            }
-                            System.out.println(obj2.getString("message"));
-                        } catch (JSONException e) {
-                            System.out.println("Error");
-                        }
-                    });
+                   });
 
 
                 } catch (JSONException e) {
@@ -158,6 +117,40 @@ public class PerfilFragment extends Fragment {
             }
         });
 
+
+
         return  v;
+    }
+    private void dialog(String status ,String mesage) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
+                if (status.equals("OK")) {
+                    alerta.setTitle("Tancar Sessió");
+                    alerta.setMessage(mesage);
+                    alerta.setNegativeButton("Tancar" ,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(getActivity(),LoginActivity.class));
+                        }
+                    });
+                    alerta.show();
+                } else if (status.equals("ERROR")) {
+                    alerta.setTitle("Error de tancar sessió");
+                    alerta.setMessage(mesage);
+                    alerta.setNegativeButton("Tancar" ,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    alerta.show();
+                }
+
+            }
+
+        });
     }
 }
