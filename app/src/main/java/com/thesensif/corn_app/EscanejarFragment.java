@@ -101,7 +101,7 @@ public class EscanejarFragment extends Fragment {
                         System.out.println("RESULT: " + result.getText());
                         try {
                             JSONObject obj = new JSONObject("{}");
-                            obj.put("user_id", MainActivity.telephon);
+                            obj.put("user_id", LoginActivity.session_token);
                             obj.put("transaction_token", result.getText());
                             UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/start_payment", obj.toString(), (response) -> {
                                 try {
@@ -120,7 +120,7 @@ public class EscanejarFragment extends Fragment {
                                                                 public void onClick(DialogInterface dialog, int id) {
                                                                     try {
                                                                         JSONObject obj3 = new JSONObject("{}");
-                                                                        obj3.put("user_id", MainActivity.telephon);
+                                                                        obj3.put("user_id", LoginActivity.session_token);
                                                                         obj3.put("transaction_token", result.getText());
                                                                         obj3.put("accept", true);
                                                                         obj3.put("amount", obj2.getString("amount"));
@@ -180,7 +180,7 @@ public class EscanejarFragment extends Fragment {
                                                         public void onClick(DialogInterface dialog, int id) {
                                                             try {
                                                                 JSONObject obj3 = new JSONObject("{}");
-                                                                obj3.put("user_id", MainActivity.telephon);
+                                                                obj3.put("user_id", LoginActivity.session_token);
                                                                 obj3.put("transaction_token", result.getText());
                                                                 obj3.put("accept", false);
                                                                 obj3.put("amount", obj2.getString("amount"));

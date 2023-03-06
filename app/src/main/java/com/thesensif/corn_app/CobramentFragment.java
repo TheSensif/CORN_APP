@@ -151,7 +151,7 @@ public class CobramentFragment extends Fragment {
                         try {
                             JSONObject obj = new JSONObject("{}");
 
-                            obj.put("user_id", MainActivity.telephon);
+                            obj.put("user_id", LoginActivity.session_token);
                             obj.put("amount", cantidad);
                             UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/setup_payment", obj.toString(), (response) -> {
                                 try {
