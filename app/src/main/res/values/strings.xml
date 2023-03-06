@@ -11,4 +11,6 @@
     <string name="telefono">Telèfon</string>
     <string name="apellido">Cognom</string>
     <string name="correo">Correu</string>
+    <string name="contrseña">Contrasenya</string>
+    <string name="repetirContrseña">Repetir Contrasenya</string>
 </resources>
