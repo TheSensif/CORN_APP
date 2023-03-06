@@ -17,8 +17,6 @@ public class MainActivity extends AppCompatActivity {
     public static String surname;
     public static String email;
 
-    public static String session_token;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
