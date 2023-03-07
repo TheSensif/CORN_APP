@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +75,28 @@ public class PerfilFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_perfil, container, false);
+
+        ImageView verificate = v.findViewById(R.id.imageView);
+        TextView description = v.findViewById(R.id.textView);
+
+        switch (MainActivity.validation_status) {
+            case "NO_VERFICAT":
+                description.setText("No verificat. Pugi el DNI una altra vegada.");
+                verificate.setImageResource(R.drawable.baseline_circle_24);
+                break;
+            case "A_VERIFICAR":
+                description.setText("En procés de verificació.");
+                verificate.setImageResource(R.drawable.baseline_circle_24_orange);
+                break;
+            case "ACCEPTAT":
+                description.setText("Verificat.");
+                verificate.setImageResource(R.drawable.baseline_circle_24_green);
+                break;
+            case "REBUTJAT":
+                description.setText("Rebutjat. Pugi el DNI una altra vegada.");
+                verificate.setImageResource(R.drawable.baseline_circle_24_red);
+                break;
+        }
 
         Button syncButon = v.findViewById(R.id.sync);
         EditText telefon = v.findViewById(R.id.editTextPhone);
