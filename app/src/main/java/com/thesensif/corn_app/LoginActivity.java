@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
             System.out.println(session_token);
             try {
                 getProfile();
-                startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                //startActivity(new Intent(LoginActivity.this,MainActivity.class));
             } catch (JSONException e) {
                 System.out.println();
             }
@@ -134,6 +134,8 @@ public class LoginActivity extends AppCompatActivity {
                     MainActivity.surname = obj2.getString("surname");
                     MainActivity.email = obj2.getString("email");
                     MainActivity.telephon = obj2.getString("phone");
+                    MainActivity.validation_status = obj2.getString("validation_status");
+                    startActivity(new Intent(LoginActivity.this,MainActivity.class));
                 } else if (obj2.getString("status").equals("ERROR")) {
                     AlertDialog.Builder alerta = new AlertDialog.Builder(LoginActivity.this);
                     alerta.setTitle("Error Token");
