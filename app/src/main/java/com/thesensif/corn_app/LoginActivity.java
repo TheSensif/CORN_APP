@@ -27,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
             System.out.println(session_token);
             try {
                 getProfile();
+                startActivity(new Intent(LoginActivity.this,MainActivity.class));
             } catch (JSONException e) {
                 System.out.println();
             }
@@ -53,10 +54,15 @@ public class LoginActivity extends AppCompatActivity {
                     UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/login", obj.toString(), (response) -> {
                         try {
                             JSONObject obj2 = new JSONObject(response);
-                            session_token = obj2.getString("session_token");
-                            System.out.println(session_token);
-                            guardarPref();
-                            dialog(obj2.getString("status"),obj2.getString("message"));
+                            if (obj2.getString("status").equals("OK")) {
+                                session_token = obj2.getString("session_token");
+                                System.out.println(session_token);
+                                guardarPref();
+                                dialog(obj2.getString("status"),obj2.getString("message"));
+                            } else if (obj2.getString("status").equals("ERROR")) {
+                                dialog(obj2.getString("status"),obj2.getString("message"));
+                            }
+
                         } catch (JSONException e) {
                             System.out.println();
                         }
@@ -90,6 +96,11 @@ public class LoginActivity extends AppCompatActivity {
                     alerta.setNegativeButton("Tancar" ,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                getProfile();
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
                             startActivity(new Intent(LoginActivity.this,MainActivity.class));
                         }
                     });
@@ -123,7 +134,6 @@ public class LoginActivity extends AppCompatActivity {
                     MainActivity.surname = obj2.getString("surname");
                     MainActivity.email = obj2.getString("email");
                     MainActivity.telephon = obj2.getString("phone");
-                    startActivity(new Intent(LoginActivity.this,MainActivity.class));
                 } else if (obj2.getString("status").equals("ERROR")) {
                     AlertDialog.Builder alerta = new AlertDialog.Builder(LoginActivity.this);
                     alerta.setTitle("Error Token");
