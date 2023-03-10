@@ -72,8 +72,9 @@ public class UtilsHTTP {
                 } catch (Exception e) {
                     System.out.println(type + " request error.");
                     e.printStackTrace();
+                    callBack.accept("{ \"status\": \"KO\", \"result\": \"Error on " + type + " request\" }");
                 }
-                callBack.accept("{ \"status\": \"KO\", \"result\": \"Error on " + type + " request\" }");
+
             }
 
         });
