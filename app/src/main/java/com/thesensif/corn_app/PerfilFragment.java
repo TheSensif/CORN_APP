@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -18,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +31,12 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -91,6 +100,7 @@ public class PerfilFragment extends Fragment {
 
         ImageView verificate = v.findViewById(R.id.imageView);
         TextView description = v.findViewById(R.id.textView);
+        Button verifcationBt = v.findViewById(R.id.buttonVerificar);
 
         switch (MainActivity.validation_status) {
             case "NO_VERFICAT":
@@ -100,10 +110,12 @@ public class PerfilFragment extends Fragment {
             case "A_VERIFICAR":
                 description.setText("En procés de verificació.");
                 verificate.setImageResource(R.drawable.baseline_circle_24_orange);
+                verifcationBt.setVisibility(View.GONE);
                 break;
             case "ACCEPTAT":
                 description.setText("Verificat.");
                 verificate.setImageResource(R.drawable.baseline_circle_24_green);
+                verifcationBt.setVisibility(View.GONE);
                 break;
             case "REBUTJAT":
                 description.setText("Rebutjat. Pugi el DNI una altra vegada.");
@@ -112,7 +124,6 @@ public class PerfilFragment extends Fragment {
         }
 
         Button syncButon = v.findViewById(R.id.sync);
-        Button verifcationBt = v.findViewById(R.id.buttonVerificar);
         EditText telefon = v.findViewById(R.id.editTextPhone);
         EditText name = v.findViewById(R.id.editTextTextPersonName);
         EditText surname = v.findViewById(R.id.editTextTextPersonSurname);
@@ -121,7 +132,7 @@ public class PerfilFragment extends Fragment {
         surname.setText(MainActivity.surname);
         email.setText(MainActivity.email);
         telefon.setText(MainActivity.telephon);
-
+        final byte[][] fileContent = new byte[1][1];
         ActivityResultLauncher<Intent> cara = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -131,8 +142,21 @@ public class PerfilFragment extends Fragment {
                             // There are no request codes
                             Intent data = result.getData();
                             Uri uri = data.getData();
+                            Bitmap bitmap = null;
+                            if (uri != null) {
+                                try {
+                                    bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                             //System.out.println(uri);
-                            caraDni = String.valueOf(uri);
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream);
+                            byte[] byteArray = outputStream.toByteArray();
+                            caraDni = Base64.getEncoder().encodeToString(byteArray);
+
+
                         }
                     }
                 }
@@ -147,8 +171,32 @@ public class PerfilFragment extends Fragment {
                             // There are no request codes
                             Intent data = result.getData();
                             Uri uri = data.getData();
+                            Bitmap bitmap = null;
+                            if (uri != null) {
+                                try {
+                                    bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                             //System.out.println(uri);
-                            culDNI = String.valueOf(uri);
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream);
+                            byte[] byteArray = outputStream.toByteArray();
+                            culDNI = Base64.getEncoder().encodeToString(byteArray);
+
+                            try {
+                                JSONObject obj = new JSONObject("{}");
+                                obj.put("session_token", LoginActivity.session_token);
+                                obj.put("picture1", caraDni);
+                                obj.put("picture2", culDNI);
+
+                                UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/send_id", obj.toString(), (response) -> {
+                                    System.out.println(response);
+                                });
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 });
