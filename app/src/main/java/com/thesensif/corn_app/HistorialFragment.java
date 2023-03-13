@@ -3,9 +3,12 @@ package com.thesensif.corn_app;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.thesensif.corn_app.databinding.ActivityMainBinding;
+import com.thesensif.corn_app.databinding.FragmentHistorialBinding;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,151 +72,77 @@ public class HistorialFragment extends Fragment {
         }
     }
     TextView balance;
-    ActivityMainBinding binding;
-    // Model = Taula de records: utilitzem ArrayList
-    ArrayList<Record> records;
+    private FragmentHistorialBinding binding;
+    private ListView listview;
+    private ArrayList<String> transactio;
 
-    // ArrayAdapter serà l'intermediari amb la ListView
-    ArrayAdapter<Record> adapter;
-
-    Handler mainHandler = new Handler();
-    ProgressDialog progressDialog;
-
-    class Record {
-        public String amount;
-        public String id;
-        public String originPhoneNumber;
-        public String origen;
-        public String destino;
-        public String accepted;
-        public String tiempo;
-
-        public Record(String _id, String _amount, String _origen, String _originPhoneNumber, String _destino, String _accepted, String _tiempo ) {
-            id = _id;
-            amount = _amount;
-            origen = _origen;
-            originPhoneNumber = _originPhoneNumber;
-            destino = _destino;
-            accepted = _accepted;
-            tiempo = _tiempo;
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        View v = inflater.inflate(R.layout.fragment_historial, binding.getRoot(), false);
-        balance = v.findViewById(R.id.historialAmount);
-        new fetchData().start();
-        records = new ArrayList<Record>();
-
-        adapter = new ArrayAdapter<Record>(getActivity(), R.layout.list_item, records )
-        {
-            @Override
-            public View getView(int pos, View convertView, ViewGroup container)
-            {
-                // getView ens construeix el layout i hi "pinta" els valors de l'element en la posició pos
-                if( convertView==null ) {
-                    // inicialitzem l'element la View amb el seu layout
-                    convertView = getLayoutInflater().inflate(R.layout.list_item, container, false);
-                }
-                // "Pintem" valors (també quan es refresca)
-                ((TextView) convertView.findViewById(R.id.tiempo)).setText(dateFormat(getItem(pos).tiempo));
-
-                if (getItem(pos).originPhoneNumber.equals("null")) {
-                    ((TextView) convertView.findViewById(R.id.itemTelefono)).setText("");
-                } else {
-                    ((TextView) convertView.findViewById(R.id.itemTelefono)).setText(getItem(pos).originPhoneNumber);
-                }
-
-                if (getItem(pos).accepted.equals("1")) {
-                    ((TextView) convertView.findViewById(R.id.estado)).setText("Aceptada");
-                }
-                if (getItem(pos).accepted.equals("0")) {
-                    ((TextView) convertView.findViewById(R.id.estado)).setText("Denegada");
-                }
-                if (getItem(pos).origen.equals(getItem(pos).id)) {
-                    ((TextView) convertView.findViewById(R.id.amount)).setText("-"+getItem(pos).amount);
-                }
-                if (getItem(pos).destino.equals(getItem(pos).id)) {
-                    ((TextView) convertView.findViewById(R.id.amount)).setText("+"+getItem(pos).amount);
-                }
-
-
-                return convertView;
-            }
-
-        };
-
-        ListView lv = (ListView) v.findViewById(R.id.recordsView);
-        lv.setAdapter(adapter);
-
-        return v;
+        binding = FragmentHistorialBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
-    private void initializerHistorialList() {
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-
-    }
-
-    class fetchData extends Thread {
-
-
-        @Override
-        public void run() {
-            super.run();
-
-            mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    progressDialog = new ProgressDialog(getActivity());
-                    progressDialog.setMessage("Cargan dades");
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-                }
-            });
-
-
-            try {
-                JSONObject obj = new JSONObject("{}");
-                obj.put("session_token", LoginActivity.session_token);
-                UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/get_record_transactions", obj.toString(), (response) -> {
-                    try {
-                        JSONObject obj2 = new JSONObject(response);
-                        balance.setText(obj2.getString("balance"));
-                        String id = obj2.getString("id");
-                        JSONArray transactions = obj2.getJSONArray("transactions");
-                        records.clear();
-                        for (int i = 0; i < transactions.length(); i++) {
-                            JSONObject transaction = transactions.getJSONObject(i);
-                            String amount = transaction.getString("amount");
-                            String originPhoneNumber = transaction.getString("originPhoneNumber");
-                            String origen = transaction.getString("origin");
-                            String destino = transaction.getString("destination");
-                            String acepted = transaction.getString("accepted");
-                            String tiempo = transaction.getString("timeFinish");
-                            records.add(new Record(id,amount,origen,originPhoneNumber,destino,acepted,tiempo));
+        ListView listView = binding.recordsView;
+        balance = binding.historialAmount;
+        transactio = new ArrayList<String>();
+        try {
+            JSONObject obj = new JSONObject("{}");
+            obj.put("session_token", LoginActivity.session_token);
+            UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/get_record_transactions", obj.toString(), (response) -> {
+                try {
+                    JSONObject obj2 = new JSONObject(response);
+                    System.out.println(response);
+                    balance.setText(obj2.getString("balance"));
+                    String id = obj2.getString("id");
+                    JSONArray transactions = obj2.getJSONArray("transactions");
+                    for (int i = 0; i < transactions.length(); i++) {
+                        JSONObject transaction = transactions.getJSONObject(i);
+                        String amount = transaction.getString("amount");
+                        String originPhoneNumber = transaction.getString("originPhoneNumber");
+                        String origen = transaction.getString("origin");
+                        String destino = transaction.getString("destination");
+                        String acepted = transaction.getString("accepted");
+                        String tiempo = transaction.getString("timeFinish");
+                        if(transaction.getInt("accepted")==1) {
+                            //orige paga y al destino le suman
+                            if (transaction.getString("originPhoneNumber").equals(MainActivity.telephon)) {
+                                transactio.add("Origen: " + transaction.getString("originPhoneNumber").toString() + "\nDesti: " + transaction.getString("destinationPhoneNumber").toString() + "\nQuantitat: " + "-"+transaction.getString("amount").toString() + "\nData: "+ dateFormat(transaction.getString("timeFinish"))+"\nAcceptat");
+                            } else {
+                                transactio.add("Origen: " + transaction.getString("originPhoneNumber").toString() + "\nDesti: " + transaction.getString("destinationPhoneNumber").toString() + "\nQuantitat: " + "+"+transaction.getString("amount").toString() + "\nData: "+ dateFormat(transaction.getString("timeFinish"))+"\nAcceptat");
+                            }
                         }
-                    } catch (JSONException e) {
-                        System.out.println();
-                    }
-                });
-            } catch (JSONException e) {
-                System.out.println();
-            }
+                        else{
+                            transactio.add("Origen: " + "\nDesti: " + transaction.getString("destinationPhoneNumber").toString() + "\nQuantitat: " + transaction.getString("amount").toString()+ "\nData: "+ dateFormat(transaction.getString("timeFinish"))+"\nCancel·lat");
 
-            mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (progressDialog.isShowing())
-                        progressDialog.dismiss();
-                    adapter.notifyDataSetChanged();
+                        }
+                        System.out.println(transactio);
+                    }
+                    System.out.println("------");
+                    System.out.println(transactio);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, transactio);
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listView.setAdapter(adapter);
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    System.out.println();
                 }
             });
+        } catch (JSONException e) {
+            System.out.println();
         }
     }
+
     private String dateFormat(String date){
         String newDateFormat = "";
         newDateFormat = date.replace('T', ' ');
