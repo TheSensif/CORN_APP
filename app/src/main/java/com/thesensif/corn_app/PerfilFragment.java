@@ -1,25 +1,42 @@
 package com.thesensif.corn_app;
 
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +44,8 @@ import org.json.JSONObject;
  * create an instance of this fragment.
  */
 public class PerfilFragment extends Fragment {
+    private String caraDni;
+    private String culDNI;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -73,6 +92,36 @@ public class PerfilFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_perfil, container, false);
+        try {
+            getProfile();
+        } catch (JSONException e) {
+            System.out.println(e);
+        }
+
+        ImageView verificate = v.findViewById(R.id.imageView);
+        TextView description = v.findViewById(R.id.textView);
+        Button verifcationBt = v.findViewById(R.id.buttonVerificar);
+
+        switch (MainActivity.validation_status) {
+            case "NO_VERFICAT":
+                description.setText("No verificat. Pugi el DNI una altra vegada.");
+                verificate.setImageResource(R.drawable.baseline_circle_24);
+                break;
+            case "A_VERIFICAR":
+                description.setText("En procés de verificació.");
+                verificate.setImageResource(R.drawable.baseline_circle_24_orange);
+                verifcationBt.setVisibility(View.GONE);
+                break;
+            case "ACCEPTAT":
+                description.setText("Verificat.");
+                verificate.setImageResource(R.drawable.baseline_circle_24_green);
+                verifcationBt.setVisibility(View.GONE);
+                break;
+            case "REBUTJAT":
+                description.setText("Rebutjat. Pugi el DNI una altra vegada.");
+                verificate.setImageResource(R.drawable.baseline_circle_24_red);
+                break;
+        }
 
         Button syncButon = v.findViewById(R.id.sync);
         EditText telefon = v.findViewById(R.id.editTextPhone);
@@ -83,6 +132,132 @@ public class PerfilFragment extends Fragment {
         surname.setText(MainActivity.surname);
         email.setText(MainActivity.email);
         telefon.setText(MainActivity.telephon);
+        final byte[][] fileContent = new byte[1][1];
+        ActivityResultLauncher<Intent> cara = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            // There are no request codes
+                            Intent data = result.getData();
+                            Uri uri = data.getData();
+                            Bitmap bitmap = null;
+                            if (uri != null) {
+                                try {
+                                    bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                            //System.out.println(uri);
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream);
+                            byte[] byteArray = outputStream.toByteArray();
+                            caraDni = Base64.getEncoder().encodeToString(byteArray);
+
+
+                        }
+                    }
+                }
+                );
+
+        ActivityResultLauncher<Intent> darera = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            // There are no request codes
+                            Intent data = result.getData();
+                            Uri uri = data.getData();
+                            Bitmap bitmap = null;
+                            if (uri != null) {
+                                try {
+                                    bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                            //System.out.println(uri);
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream);
+                            byte[] byteArray = outputStream.toByteArray();
+                            culDNI = Base64.getEncoder().encodeToString(byteArray);
+
+                            try {
+                                JSONObject obj = new JSONObject("{}");
+                                obj.put("session_token", LoginActivity.session_token);
+                                obj.put("picture1", caraDni);
+                                obj.put("picture2", culDNI);
+
+                                UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/send_id", obj.toString(), (response) -> {
+                                    System.out.println(response);
+                                });
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                });
+
+        verifcationBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
+                        alerta.setTitle("Verificacio").setMessage("Selecciona la imatge de la cara del teu DNI.");
+                        alerta.setPositiveButton("Selecionar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Create Intent
+                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                intent.setType("image/jpg");
+                                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                                //Launch activity to get result
+                                cara.launch(intent);
+                                Handler handler2 = new Handler(Looper.getMainLooper());
+                                handler2.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
+                                        alerta.setTitle("Verificacio").setMessage("Selecciona la imatge del cul del teu DNI.");
+                                        alerta.setPositiveButton("Selecionar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                //Create Intent
+                                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                                intent.setType("image/jpg");
+                                                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                                                //Launch activity to get result
+                                                darera.launch(intent);
+                                            }
+                                        });
+                                        alerta.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                        alerta.show();
+                                    }
+                                });
+                            }
+                        });
+                        alerta.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        alerta.show();
+                    }
+                });
+            }
+        });
 
         syncButon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,6 +326,37 @@ public class PerfilFragment extends Fragment {
 
             }
 
+        });
+    }
+
+    private void getProfile() throws JSONException {
+        JSONObject obj = new JSONObject("{}");
+        obj.put("session_token", LoginActivity.session_token);
+        UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/get_profile", obj.toString(), (response) -> {
+            System.out.println(response);
+            try {
+                JSONObject obj2 = new JSONObject(response);
+                if (obj2.getString("status").equals("OK")) {
+                    MainActivity.name = obj2.getString("name");
+                    MainActivity.surname = obj2.getString("surname");
+                    MainActivity.email = obj2.getString("email");
+                    MainActivity.telephon = obj2.getString("phone");
+                    MainActivity.validation_status = obj2.getString("validation_status");
+                } else if (obj2.getString("status").equals("ERROR")) {
+                    AlertDialog.Builder alerta = new AlertDialog.Builder(getActivity());
+                    alerta.setTitle("Error Token");
+                    alerta.setMessage(obj2.getString("message"));
+                    alerta.setNegativeButton("Tancar" ,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    alerta.show();
+                }
+            } catch (JSONException e) {
+                System.out.println();
+            }
         });
     }
 }

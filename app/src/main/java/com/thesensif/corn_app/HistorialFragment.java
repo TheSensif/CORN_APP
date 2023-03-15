@@ -1,12 +1,29 @@
 package com.thesensif.corn_app;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.thesensif.corn_app.databinding.ActivityMainBinding;
+import com.thesensif.corn_app.databinding.FragmentHistorialBinding;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,13 +71,82 @@ public class HistorialFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+    TextView balance;
+    private FragmentHistorialBinding binding;
+    private ListView listview;
+    private ArrayList<String> transactio;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_historial, container, false);
+        binding = FragmentHistorialBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
-        return v;
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        ListView listView = binding.recordsView;
+        balance = binding.historialAmount;
+        transactio = new ArrayList<String>();
+        try {
+            JSONObject obj = new JSONObject("{}");
+            obj.put("session_token", LoginActivity.session_token);
+            UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/get_record_transactions", obj.toString(), (response) -> {
+                try {
+                    JSONObject obj2 = new JSONObject(response);
+                    System.out.println(response);
+                    balance.setText(obj2.getString("balance"));
+                    String id = obj2.getString("id");
+                    JSONArray transactions = obj2.getJSONArray("transactions");
+                    for (int i = 0; i < transactions.length(); i++) {
+                        JSONObject transaction = transactions.getJSONObject(i);
+                        String amount = transaction.getString("amount");
+                        String originPhoneNumber = transaction.getString("originPhoneNumber");
+                        String origen = transaction.getString("origin");
+                        String destino = transaction.getString("destination");
+                        String acepted = transaction.getString("accepted");
+                        String tiempo = transaction.getString("timeFinish");
+                        if(transaction.getInt("accepted")==1) {
+                            //orige paga y al destino le suman
+                            if (transaction.getString("originPhoneNumber").equals(MainActivity.telephon)) {
+                                transactio.add("Origen: " + transaction.getString("originPhoneNumber").toString() + "\nDesti: " + transaction.getString("destinationPhoneNumber").toString() + "\nQuantitat: " + "-"+transaction.getString("amount").toString() + "\nData: "+ dateFormat(transaction.getString("timeFinish"))+"\nAcceptat");
+                            } else {
+                                transactio.add("Origen: " + transaction.getString("originPhoneNumber").toString() + "\nDesti: " + transaction.getString("destinationPhoneNumber").toString() + "\nQuantitat: " + "+"+transaction.getString("amount").toString() + "\nData: "+ dateFormat(transaction.getString("timeFinish"))+"\nAcceptat");
+                            }
+                        }
+                        else{
+                            transactio.add("Origen: " + "\nDesti: " + transaction.getString("destinationPhoneNumber").toString() + "\nQuantitat: " + transaction.getString("amount").toString()+ "\nData: "+ dateFormat(transaction.getString("timeFinish"))+"\nCancel·lat");
+
+                        }
+                        System.out.println(transactio);
+                    }
+                    System.out.println("------");
+                    System.out.println(transactio);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, transactio);
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listView.setAdapter(adapter);
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    System.out.println();
+                }
+            });
+        } catch (JSONException e) {
+            System.out.println();
+        }
+    }
+
+    private String dateFormat(String date){
+        String newDateFormat = "";
+        newDateFormat = date.replace('T', ' ');
+        newDateFormat = newDateFormat.replace(".000Z", "");
+        return newDateFormat;
     }
 }

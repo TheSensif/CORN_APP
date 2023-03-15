@@ -65,13 +65,10 @@ public class RegisterActivity extends AppCompatActivity {
                     if (value.equals("true")) {
                         UtilsHTTP.sendPOST("https://cornapi-production-5680.up.railway.app:443/api/signup", obj.toString(), (response) -> {
                             try {
-
                                 JSONObject obj2 = new JSONObject(response);
-                                System.out.println(response);
                                 if (obj2.getString("status").equals("OK")) {
                                     LoginActivity.session_token = obj2.getString("session_token");
                                     guardarPref();
-                                    System.out.println(LoginActivity.session_token);
                                     dialog(obj2.getString("status"),obj2.getString("message"));
                                 } else if (obj2.getString("status").equals("ERROR")) {
                                     dialog(obj2.getString("status"),obj2.getString("message"));
@@ -114,6 +111,7 @@ public class RegisterActivity extends AppCompatActivity {
                             MainActivity.surname = surname.getText().toString();
                             MainActivity.email = email.getText().toString();
                             MainActivity.telephon = phone.getText().toString();
+                            MainActivity.validation_status = "NO_VERFICAT";
                             startActivity(new Intent(RegisterActivity.this,MainActivity.class));
                         }
                     });
