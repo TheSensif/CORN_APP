@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     public static String name;
     public static String surname;
     public static String email;
+    public static String validation_status;
 
 
     @Override
